@@ -71,7 +71,7 @@ update msg model =
       Rest  rest   -> { model | rest = rest }
       Times times  -> { model | times = times }
       Reset  -> { model | soFar = -5 }
-      Flip   -> { model | active = False }
+      Flip   -> { model | active = not model.active }
     , Cmd.none )
 -- SUBSCRIPTIONS
 
