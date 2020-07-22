@@ -1,3 +1,4 @@
+module Main exposing (..)
 --   https://guide.elm-lang.org/effects/time.html
 
 import Browser
@@ -5,6 +6,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Task
 import Time
+import Html.Events exposing (onClick)
+
 
 -- MAIN
 
@@ -19,12 +22,19 @@ main =
 
 -- MODEL
 
-type alias Model = Int
+type alias Model = 
+  { soFar : Int
+  , go : Int
+  , rest : Int
+  , time : Int
+  , times : Int
+  , active : Bool
+  }
 
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( -2
+  ( Model -5 8 10 0 12 True
   , Cmd.none
   )
 
@@ -33,16 +43,32 @@ init _ =
 
 type Msg
   = Tick Time.Posix
+  | Go Int
+  | Rest Int
+  | Times Int
+  | Reset Int
+  | Flip Bool
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    Tick newTime ->
-      ( model + 1
-      , Cmd.none
-      )
-
+  ( case msg of
+      Tick newTime -> { model | soFar = 
+          if model.active then
+              model.soFar + 1
+          else
+              model.soFar
+         , time = 
+             if ((modBy (model.go + model.rest) (model.soFar + 1)) == 0) then
+                 model.time + 1
+             else
+                 model.time }
+      Go    go     -> { model | go = go }
+      Rest  rest   -> { model | rest = rest }
+      Times times  -> { model | times = times }
+      Reset soFar  -> { model | soFar = soFar }
+      Flip  active -> { model | active = active }
+    , Cmd.none )
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
@@ -55,26 +81,21 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   let
-    go = 4
-    rest = 3
-    times = 2
-    subTime1 = modBy (go + rest) model
-    subTime2 = subTime1 - go
-    done = (((go + rest) * times) - rest) <= model
+    size = "2500%"
+    subTime1 = modBy (model.go + model.rest) model.soFar
+    subTime2 = subTime1 - model.go
+    done = (((model.go + model.rest) * model.times) - model.rest) <= model.soFar
+    startStop = if model.active then "Stop" else "Start"
   in
-    if model < 0 then
-      div [style "color" "purple"] [
-        h1 [style "font-size" "800%"] [ text (String.fromInt model) ]
-      ]
-    else if done then
-      div [style "color" "red"] [
-        h1 [style "font-size" "800%"] [ text "DONE" ]
-      ]
+    div [] [ button [] [text startStop ],
+    div [style "font-size" "400%"] [ text ((String.fromInt (model.time)) ++" / "++ (String.fromInt model.times)) ],
+    if done then
+      div [style "color" "red", style "font-size" size] [ text "DONE" ]
+    else if model.soFar < 0 then
+      div [style "color" "purple", style "font-size" size] [ text (String.fromInt model.soFar) ]
     else if subTime2 < 0 then
-      div [style "color" "green"] [
-        h1 [style "font-size" "800%"] [ text (String.fromInt (go - subTime1)) ]
-      ]
+      div [style "color" "green", style "font-size" size] [ text (String.fromInt (model.go - subTime1)) ]
     else
-      div [style "color" "blue"] [
-        h1 [style "font-size" "800%"] [ text (String.fromInt (rest - subTime2)) ]
-      ]
+      div [style "color" "blue", style "font-size" size] [ text (String.fromInt (model.rest - subTime2)) ]
+    ]  
+      
