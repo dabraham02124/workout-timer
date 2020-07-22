@@ -46,8 +46,8 @@ type Msg
   | Go Int
   | Rest Int
   | Times Int
-  | Reset Int
-  | Flip Bool
+  | Reset
+  | Flip 
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -63,15 +63,15 @@ update msg model =
                  model.time + 1
              else
                  model.time
-         , active = if (((model.go + model.rest) * model.times) - model.rest) <= model.soFar then
+         , active = if (not model.active || (((model.go + model.rest) * model.times) - model.rest) <= model.soFar) then
                  False
              else
                  True }
       Go    go     -> { model | go = go }
       Rest  rest   -> { model | rest = rest }
       Times times  -> { model | times = times }
-      Reset soFar  -> { model | soFar = soFar }
-      Flip  active -> { model | active = active }
+      Reset  -> { model | soFar = -5 }
+      Flip   -> { model | active = False }
     , Cmd.none )
 -- SUBSCRIPTIONS
 
@@ -90,7 +90,9 @@ view model =
     subTime2 = subTime1 - model.go
     startStop = if model.active then "Stop" else "Start"
   in
-    div [] [ button [] [text startStop ],
+    div [] [
+    div [] [ button [ onClick Reset ] [text "Reset" ]],
+    div [] [ button [ onClick Flip ] [text startStop ]],
     div [style "font-size" "400%"] [ text ((String.fromInt (model.time)) ++" / "++ (String.fromInt model.times)) ],
     if not model.active then
       div [style "color" "red", style "font-size" size] [ text "DONE" ]
@@ -100,5 +102,4 @@ view model =
       div [style "color" "green", style "font-size" size] [ text (String.fromInt (model.go - subTime1)) ]
     else
       div [style "color" "blue", style "font-size" size] [ text (String.fromInt (model.rest - subTime2)) ]
-    ]  
-      
+    ]
