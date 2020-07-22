@@ -62,7 +62,11 @@ update msg model =
              if ((modBy (model.go + model.rest) (model.soFar + 1)) == 0) then
                  model.time + 1
              else
-                 model.time }
+                 model.time
+         , active = if (((model.go + model.rest) * model.times) - model.rest) <= model.soFar then
+                 False
+             else
+                 True }
       Go    go     -> { model | go = go }
       Rest  rest   -> { model | rest = rest }
       Times times  -> { model | times = times }
@@ -84,12 +88,11 @@ view model =
     size = "2500%"
     subTime1 = modBy (model.go + model.rest) model.soFar
     subTime2 = subTime1 - model.go
-    done = (((model.go + model.rest) * model.times) - model.rest) <= model.soFar
     startStop = if model.active then "Stop" else "Start"
   in
     div [] [ button [] [text startStop ],
     div [style "font-size" "400%"] [ text ((String.fromInt (model.time)) ++" / "++ (String.fromInt model.times)) ],
-    if done then
+    if not model.active then
       div [style "color" "red", style "font-size" size] [ text "DONE" ]
     else if model.soFar < 0 then
       div [style "color" "purple", style "font-size" size] [ text (String.fromInt model.soFar) ]
