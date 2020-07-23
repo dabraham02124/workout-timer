@@ -34,7 +34,7 @@ type alias Model =
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model -5 8 10 0 12 True
+  ( Model -5 8 10 0 12 False
   , Cmd.none
   )
 
@@ -70,7 +70,8 @@ update msg model =
       Go    go     -> { model | go = go }
       Rest  rest   -> { model | rest = rest }
       Times times  -> { model | times = times }
-      Reset  -> { model | soFar = -5 }
+      Reset  -> { model | soFar = -5
+        , time = 0}
       Flip   -> { model | active = not model.active }
     , Cmd.none )
 -- SUBSCRIPTIONS
