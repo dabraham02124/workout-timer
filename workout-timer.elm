@@ -63,10 +63,7 @@ update msg model =
                  model.time + 1
              else
                  model.time
-         , active = if (not model.active || (((model.go + model.rest) * model.times) - model.rest) <= model.soFar) then
-                 False
-             else
-                 True }
+         , active = not (shouldBeActive model) }
       Go    go     -> { model | go = stringToInt go model.go }
       Rest  rest   -> { model | rest = stringToInt rest model.rest }
       Times times  -> { model | times = stringToInt times model.times }
@@ -74,10 +71,15 @@ update msg model =
         , time = 0}
       Flip   -> { model | active = not model.active }
     , Cmd.none )
-    
+
+shouldBeActive : Model -> Bool
+shouldBeActive model =
+  (not model.active || (((model.go + model.rest) * model.times) - model.rest) <= (model.soFar+1))
+
 stringToInt : String -> Int -> Int
 stringToInt string default =
   Maybe.withDefault default (String.toInt string)
+
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
