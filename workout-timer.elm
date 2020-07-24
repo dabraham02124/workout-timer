@@ -68,7 +68,8 @@ update msg model =
       Rest  rest   -> { model | rest = stringToInt rest model.rest }
       Times times  -> { model | times = stringToInt times model.times }
       Reset  -> { model | soFar = -5
-        , time = 0}
+          , time = 0
+          , active = False}
       Flip   -> { model | active = not model.active }
     , Cmd.none )
 
